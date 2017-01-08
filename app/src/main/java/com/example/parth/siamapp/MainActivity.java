@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_news_feed) {
             // Handle the camera action
         } else if (id == R.id.nav_contest) {
+            ContestFragment fragmentS1 = new ContestFragment();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
 
         } else if (id == R.id.nav_sponsors) {
 
