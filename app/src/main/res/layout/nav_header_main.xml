@@ -10,26 +10,40 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+    android:theme="@style/ThemeOverlay.AppCompat.Dark"
+    android:id="@+id/nav_header">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        app:srcCompat="@android:drawable/sym_def_app_icon" />
+    <!--<ImageView-->
+        <!--android:id="@+id/profile_image_nav_header"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingTop="@dimen/nav_header_vertical_spacing"-->
+        <!--app:srcCompat="@android:drawable/sym_def_app_icon" />-->
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/profile_image_nav_header"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+        android:src="@drawable/com_facebook_profile_picture_blank_portrait"
+        android:layout_gravity="center_horizontal"
+        android:elevation="5dp"
+        android:padding="16dp"/>
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:paddingTop="10dp"
         android:text="User name"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:id="@+id/name_nav_header"
+        android:layout_gravity="center_horizontal"/>
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/credits_nav_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Credit : 00" />
+        android:text="Credit : 20"
+        android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>
