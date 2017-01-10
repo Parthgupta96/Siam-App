@@ -16,7 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+int lastSelectedID = R.id.nav_news_feed;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +32,10 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.nav_news_feed);
+        Fragment fragment = new FacebookFeed();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_main, fragment).commit();
     }
 
     @Override
@@ -63,7 +67,7 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
 
-        if(id == R.id.action_signOut){
+        if (id == R.id.action_signOut) {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
 
@@ -77,26 +81,33 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Fragment fragment;
-        if (id == R.id.nav_news_feed) {
-            fragment = new FacebookFeed();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.content_main, fragment).commit();
+        Fragment fragment= new FacebookFeed();;
+        if(lastSelectedID!=id) {
+            if (id == R.id.nav_news_feed) {
+                fragment = new FacebookFeed();
+//                getSupportFragmentManager().beginTransaction()
+//                        .replace(R.id.content_main, fragment).commit();
 
-        } else if (id == R.id.nav_contest) {
-            ContestFragment fragmentS1 = new ContestFragment();
-            getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
+            } else if (id == R.id.nav_contest) {
+                fragment = new ContestFragment();
+//                getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
 
-        } else if (id == R.id.nav_sponsors) {
+            } else if (id == R.id.nav_sponsors) {
 
-        } else if (id == R.id.nav_contact_us) {
+            } else if (id == R.id.nav_contact_us) {
 
-        } else if (id == R.id.nav_settings) {
+            } else if (id == R.id.nav_settings) {
 
-        } else if (id == R.id.nav_rate_us) {
+            } else if (id == R.id.nav_rate_us) {
 
+            } else if (id == R.id.nav_events) {
+                 fragment = new EventsFragment();
+//                getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
+            }
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragment).commit();
+
+            lastSelectedID = id;
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

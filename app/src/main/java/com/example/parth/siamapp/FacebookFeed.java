@@ -5,19 +5,23 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.parth.siamapp.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -37,7 +41,8 @@ public class FacebookFeed extends Fragment {
     ArrayList<String> newsDates = new ArrayList<>();
     RecyclerView recyclerView;
     String TAG = getClass().getSimpleName();
-Context mContext;
+    Context mContext;
+
     public FacebookFeed() {
         // Required empty public constructor
     }
@@ -49,8 +54,13 @@ Context mContext;
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_facebook_feed, container, false);
         init(view);
-        getFeed();
+
         mContext = getContext();
+        if(Utils.isInternetConnected(mContext)){
+            getFeed();
+        }else{
+            Toast.makeText(mContext,"internet not connected",Toast.LENGTH_SHORT).show();
+        }
         return view;
     }
 
@@ -84,7 +94,7 @@ Context mContext;
                                         newsPhotos.add("");
                                 }
                             }
-                            CustomAdapter adapter = new CustomAdapter(newsPhotos, newsLines, newsDates,mContext);
+                            CustomAdapter adapter = new CustomAdapter(newsPhotos, newsLines, newsDates, mContext);
                             recyclerView.setAdapter(adapter);
                         } catch (JSONException e) {
 
@@ -117,11 +127,11 @@ Context mContext;
         ArrayList<String> dates;
         Context mContext;
 
-        public CustomAdapter(ArrayList<String> photos, ArrayList<String> headlines, ArrayList<String> dates,Context context) {
+        public CustomAdapter(ArrayList<String> photos, ArrayList<String> headlines, ArrayList<String> dates, Context context) {
             this.photos = photos;
             this.headlines = headlines;
             this.dates = dates;
-            mContext =context;
+            mContext = context;
         }
 
         @Override
@@ -131,7 +141,7 @@ Context mContext;
         }
 
         @Override
-        public void onBindViewHolder(CustomViewHolder holder, int position) {
+        public void onBindViewHolder(CustomViewHolder holder, final int position) {
             if (photos.size() > 0 && (photos.get(position).length() != 0)) {
 
                 holder.newsPhoto.setVisibility(View.VISIBLE);
@@ -150,7 +160,25 @@ Context mContext;
             holder.newsPhoto.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 
+                    final AlertDialog dialog = builder.create();
+                    LayoutInflater inflater = getActivity().getLayoutInflater();
+                    final View dialogLayout = inflater.inflate(R.layout.image_view, null);
+                    final ImageView imageView = (ImageView) dialogLayout.findViewById(R.id.feed_image_enlarge);
+
+                    Picasso.with(mContext)
+                            .load(photos.get(position))
+                            .into(imageView);
+                    Button closeButton = (Button) dialogLayout.findViewById(R.id.feed_image_enlarge_close);
+                    closeButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.dismiss();
+                        }
+                    });
+                    dialog.setView(dialogLayout);
+                    dialog.show();
                 }
             });
         }

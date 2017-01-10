@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
+public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     // TODO: 05-01-2017 Add FireBase Login
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 1;
@@ -31,6 +31,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private static final String TAG = "LoginActivity";
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +40,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestIdToken("907320167770-ej0tapbp098b4bvusgl9hju3uuo4aa4i.apps.googleusercontent.com")
+                .requestIdToken("997717969943-88s33kq0hjsqtfrj93addpioqh7rtbka.apps.googleusercontent.com")
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -56,7 +57,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     Toast.makeText(getApplicationContext(), "signed in successfully", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     supportFinishAfterTransition();
                     startActivity(intent);
                 } else {
@@ -108,6 +109,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         } else {
             // Signed out, show unauthenticated UI.
             Toast.makeText(this, "Sign in failed by google", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            supportFinishAfterTransition();
+            startActivity(intent);
+
         }
     }
 

@@ -1,8 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-<ImageView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" />
+    android:layout_height="wrap_content"
+    android:background="#eeeeee"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/feed_image_enlarge"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/round_frame"
+        android:src="@drawable/avatar" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@drawable/image_light_gradient"
+        app:layout_anchor="@+id/feed_image_enlarge_close"
+        app:layout_anchorGravity="center|bottom" />
+
+    <Button
+        android:id="@+id/feed_image_enlarge_close"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/close"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_anchor="@+id/feed_image_enlarge"
+        app:layout_anchorGravity="bottom|right" />
+
+
 </android.support.design.widget.CoordinatorLayout>
