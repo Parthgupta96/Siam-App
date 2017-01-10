@@ -21,4 +21,7 @@
     <string name="siam_dtu">SIAM-DTU</string>
     <string name="close">close</string>
     <string name="events">Events</string>
+
+    <string name="google_auth_key_1">907320167770-ej0tapbp098b4bvusgl9hju3uuo4aa4i.apps.googleusercontent.com</string>
+    <string name="google_auth_key_2"></string>
 </resources>

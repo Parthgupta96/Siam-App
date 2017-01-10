@@ -25,7 +25,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     // TODO: 05-01-2017 Add FireBase Login
-    private GoogleApiClient mGoogleApiClient;
+    public static GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 1;
     private SignInButton login;
     private static final String TAG = "LoginActivity";
@@ -40,7 +40,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestIdToken("997717969943-88s33kq0hjsqtfrj93addpioqh7rtbka.apps.googleusercontent.com")
+                .requestIdToken(getResources().getString(R.string.google_auth_key_1))
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -55,9 +55,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
+                    UserObject currentUser = new UserObject();
+                    currentUser.setEmail(user.getEmail());
+                    currentUser.setName(user.getDisplayName());
+                    currentUser.setPhotoUrl(user.getPhotoUrl().toString());
+                    currentUser.setUid(user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     Toast.makeText(getApplicationContext(), "signed in successfully", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                    intent.putExtra("currentUser", currentUser);
                     supportFinishAfterTransition();
                     startActivity(intent);
                 } else {
