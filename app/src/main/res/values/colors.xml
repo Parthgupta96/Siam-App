@@ -6,4 +6,7 @@
     <color name="row_background">#f6e5e5</color>
     <color name="row_selected_background">#f5d6d6</color>
     <color name="background">#d6b2b2b2</color>
+
+    <color name="headerBackground">#eeeeee</color>
+    <color name="divider">#9e9e9e</color>
 </resources>

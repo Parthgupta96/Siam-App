@@ -61,19 +61,22 @@ public class MainActivity extends AppCompatActivity
         LinearLayout navHeader = (LinearLayout) headerview.findViewById(R.id.nav_header);
         ImageView profileImage = (ImageView)headerview.findViewById(R.id.profile_image_nav_header);
         TextView name = (TextView)headerview.findViewById(R.id.name_nav_header);
-        Picasso.with(this).load(mCurrentUser.getPhotoUrl()).noFade().placeholder(R.drawable.avatar)
-                .error(R.drawable.avatar).into(profileImage);
-        name.setText(mCurrentUser.getName());
-        navHeader.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ProfileFragment fragmentS1 = ProfileFragment.newInstance(mCurrentUser);
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
+        if(mCurrentUser!=null){
 
-            }
-        });
+            Picasso.with(this).load(mCurrentUser.getPhotoUrl()).noFade().placeholder(R.drawable.avatar)
+                    .error(R.drawable.avatar).into(profileImage);
+            name.setText(mCurrentUser.getName());
+            navHeader.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ProfileFragment fragmentS1 = ProfileFragment.newInstance(mCurrentUser);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
+                    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                    drawer.closeDrawer(GravityCompat.START);
+
+                }
+            });
+        }
     }
 
     @Override
