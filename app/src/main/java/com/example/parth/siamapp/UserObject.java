@@ -13,6 +13,15 @@ public class UserObject implements Serializable {
     private String email;
     private String photoUrl;
     private String contact;
+    private int credits;
+
+    public int getCredits() {
+        return credits;
+    }
+
+    public void setCredits(int credits) {
+        this.credits = credits;
+    }
 
     public String getName() {
         return name;

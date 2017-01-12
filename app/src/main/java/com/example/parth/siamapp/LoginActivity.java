@@ -1,8 +1,10 @@
 package com.example.parth.siamapp;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -15,6 +17,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -22,6 +26,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     // TODO: 05-01-2017 Add FireBase Login
@@ -31,6 +40,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private static final String TAG = "LoginActivity";
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference mRefUsers;
+    private FirebaseUser mUser;
+    private UserObject mCurrentUser;
+    private ProgressDialog mProgreeDialog;
+    private boolean needToSignOut = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,23 +64,22 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .build();
 
         mAuth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mRefUsers = mFirebaseDatabase.getReference().child("Users");
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
+                mUser = firebaseAuth.getCurrentUser();
+                if (mUser != null) {
                     // User is signed in
-                    UserObject currentUser = new UserObject();
-                    currentUser.setEmail(user.getEmail());
-                    currentUser.setName(user.getDisplayName());
-                    currentUser.setPhotoUrl(user.getPhotoUrl().toString());
-                    currentUser.setUid(user.getUid());
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    Toast.makeText(getApplicationContext(), "signed in successfully", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                    intent.putExtra("currentUser", currentUser);
-                    supportFinishAfterTransition();
-                    startActivity(intent);
+                    initializeSignIn();
+                    if(needToSignOut == false) {
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        intent.putExtra("currentUser", mCurrentUser);
+                        supportFinishAfterTransition();
+                        startActivity(intent);
+                    }
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -73,6 +87,72 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 // ...
             }
         };
+
+    }
+
+    private void initializeSignIn() {
+        UserObject currentUser = new UserObject();
+        mCurrentUser.setEmail(mUser.getEmail());
+        mCurrentUser.setName(mUser.getDisplayName());
+        mCurrentUser.setPhotoUrl(mUser.getPhotoUrl().toString());
+        mCurrentUser.setUid(mUser.getUid());
+        Log.d(TAG, "onAuthStateChanged:signed_in:" + mUser.getUid());
+        Toast.makeText(getApplicationContext(), "signed in successfully", Toast.LENGTH_SHORT).show();
+
+        checkFirebaseDatabase();
+
+    }
+
+    private void checkFirebaseDatabase() {
+        mProgreeDialog.setMessage("Please Wait...");
+        mProgreeDialog.show();
+        mRefUsers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String email = mCurrentUser.getEmail().replace('.', ',');
+                if (!dataSnapshot.hasChild(email)) {
+                    mProgreeDialog.dismiss();
+                    mCurrentUser.setCredits(0);
+                    mRefUsers.child(email).setValue(mCurrentUser);
+                } else {
+                    mProgreeDialog.dismiss();
+                    mCurrentUser = dataSnapshot.getValue(UserObject.class);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                //fail the signin and signout the user
+                signOut();
+                needToSignOut = true;
+            }
+        });
+    }
+
+    private void signOut() {
+        FirebaseAuth.getInstance().signOut();
+        mGoogleApiClient.connect();
+        mGoogleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(@Nullable Bundle bundle) {
+
+                FirebaseAuth.getInstance().signOut();
+                if(mGoogleApiClient.isConnected()) {
+                    Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(@NonNull Status status) {
+                            if (status.isSuccess()) {
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onConnectionSuspended(int i) {
+                Toast.makeText(getApplicationContext(), "Some error occured. Please try Again", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void init() {
