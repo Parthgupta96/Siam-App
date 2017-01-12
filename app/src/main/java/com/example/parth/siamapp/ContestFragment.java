@@ -78,7 +78,7 @@ public class ContestFragment extends Fragment {
 
         mContestRecyclerView = (RecyclerView)root.findViewById(R.id.contest_questions_recycler_view);
         QuestionObject obj1 = new QuestionObject();
-        obj1.name = "abc";
+//        obj1.name = "abc";
         mQuestions = new ArrayList<>();
         mQuestions.add(obj1);
         mQuestions.add(obj1);

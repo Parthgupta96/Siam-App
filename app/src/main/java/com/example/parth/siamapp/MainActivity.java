@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity
     int lastSelectedID = R.id.nav_news_feed;
 
     UserObject mCurrentUser;
+    NavigationView mNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +52,17 @@ public class MainActivity extends AppCompatActivity
         Intent intent = getIntent();
         mCurrentUser = (UserObject)intent.getSerializableExtra("currentUser");
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setCheckedItem(R.id.nav_news_feed);
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mNavigationView.setCheckedItem(R.id.nav_news_feed);
         Fragment fragment = new FacebookFeed();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_main, fragment).commit();
-        View headerview = navigationView.getHeaderView(0);
+        setUpNavigationDrawerHeader();
+    }
+
+    private void setUpNavigationDrawerHeader() {
+        View headerview = mNavigationView.getHeaderView(0);
         LinearLayout navHeader = (LinearLayout) headerview.findViewById(R.id.nav_header);
         ImageView profileImage = (ImageView)headerview.findViewById(R.id.profile_image_nav_header);
         TextView name = (TextView)headerview.findViewById(R.id.name_nav_header);
@@ -109,34 +114,37 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (id == R.id.action_signOut) {
-            FirebaseAuth.getInstance().signOut();
-            mGoogleApiClient.connect();
-            mGoogleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                @Override
-                public void onConnected(@Nullable Bundle bundle) {
-
-                    FirebaseAuth.getInstance().signOut();
-                    if(mGoogleApiClient.isConnected()) {
-                        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(@NonNull Status status) {
-                                if (status.isSuccess()) {
-                                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                                }
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onConnectionSuspended(int i) {
-                    Toast.makeText(getApplicationContext(), "Some error occured. Please try Again", Toast.LENGTH_SHORT).show();
-                }
-            });
-
+            signOut();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void signOut() {
+        FirebaseAuth.getInstance().signOut();
+        mGoogleApiClient.connect();
+        mGoogleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(@Nullable Bundle bundle) {
+
+                FirebaseAuth.getInstance().signOut();
+                if(mGoogleApiClient.isConnected()) {
+                    Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(@NonNull Status status) {
+                            if (status.isSuccess()) {
+                                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onConnectionSuspended(int i) {
+                Toast.makeText(getApplicationContext(), "Some error occured. Please try Again", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
