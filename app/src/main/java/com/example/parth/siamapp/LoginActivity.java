@@ -74,7 +74,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 if (mUser != null) {
                     // User is signed in
                     initializeSignIn();
-                    if(needToSignOut == false) {
+                    if (!needToSignOut) {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         intent.putExtra("currentUser", mCurrentUser);
                         supportFinishAfterTransition();
@@ -91,7 +91,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void initializeSignIn() {
-        UserObject currentUser = new UserObject();
+        UserObject mCurrentUser = new UserObject();
         mCurrentUser.setEmail(mUser.getEmail());
         mCurrentUser.setName(mUser.getDisplayName());
         mCurrentUser.setPhotoUrl(mUser.getPhotoUrl().toString());
@@ -104,19 +104,21 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void checkFirebaseDatabase() {
-        mProgreeDialog.setMessage("Please Wait...");
-        mProgreeDialog.show();
+//        mProgreeDialog.setMessage("Please Wait...");
+//        mProgreeDialog.show();
         mRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String email = mCurrentUser.getEmail().replace('.', ',');
-                if (!dataSnapshot.hasChild(email)) {
-                    mProgreeDialog.dismiss();
-                    mCurrentUser.setCredits(0);
-                    mRefUsers.child(email).setValue(mCurrentUser);
-                } else {
-                    mProgreeDialog.dismiss();
-                    mCurrentUser = dataSnapshot.getValue(UserObject.class);
+                if (mCurrentUser != null) {
+                    String email = mCurrentUser.getEmail().replace('.', ',');
+                    if (!dataSnapshot.hasChild(email)) {
+//                    mProgreeDialog.dismiss();
+                        mCurrentUser.setCredits(0);
+                        mRefUsers.child(email).setValue(mCurrentUser);
+                    } else {
+//                    mProgreeDialog.dismiss();
+                        mCurrentUser = dataSnapshot.getValue(UserObject.class);
+                    }
                 }
             }
 
@@ -137,7 +139,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             public void onConnected(@Nullable Bundle bundle) {
 
                 FirebaseAuth.getInstance().signOut();
-                if(mGoogleApiClient.isConnected()) {
+                if (mGoogleApiClient.isConnected()) {
                     Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
                         @Override
                         public void onResult(@NonNull Status status) {

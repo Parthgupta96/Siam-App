@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +20,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.parth.siamapp.listeners.EndlessRecyclerViewScrollListener;
 import com.example.parth.siamapp.utils.Utils;
 import com.squareup.picasso.Picasso;
 
@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 
@@ -36,17 +37,70 @@ import java.util.ArrayList;
  */
 public class FacebookFeed extends Fragment {
 
-    ArrayList<String> newsLines = new ArrayList<>();
-    ArrayList<String> newsPhotos = new ArrayList<>();
-    ArrayList<String> newsDates = new ArrayList<>();
-    RecyclerView recyclerView;
-    String TAG = getClass().getSimpleName();
-    Context mContext;
-
     public FacebookFeed() {
         // Required empty public constructor
     }
+    public static boolean isLoading = false;
+    EndlessRecyclerViewScrollListener endlessRecyclerViewScrollListener;
+    ArrayList<String> newsLines;
+    ArrayList<String> newsPhotos;
+    ArrayList<String> newsDates;
+    RecyclerView recyclerView;
+    FbFeed fbFeed;
+    String TAG = getClass().getSimpleName();
+    Context mContext;
+    String nextPage;
+    CustomAdapter adapter;
 
+    private class FbFeed implements Serializable {
+         ArrayList<String> fbNewsLines;
+         ArrayList<String> fbNewsPhotos;
+         ArrayList<String> fbNewsDates;
+
+        public FbFeed() {
+        }
+
+        public FbFeed(ArrayList<String> newsPhotos, ArrayList<String> newsLines, ArrayList<String> newsDates) {
+            this.fbNewsDates = newsDates;
+            this.fbNewsLines = newsLines;
+            this.fbNewsPhotos = newsPhotos;
+        }
+
+        public void add(ArrayList<String> newsPhotos, ArrayList<String> newsLines, ArrayList<String> newsDates) {
+            this.fbNewsDates.addAll(newsDates);
+            this.fbNewsLines.addAll(newsLines);
+            this.fbNewsPhotos.addAll(newsPhotos);
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        newsLines = new ArrayList<>();
+        newsPhotos = new ArrayList<>();
+        newsDates = new ArrayList<>();
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+    }
+
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        if (fbFeed != null) {
+//            Log.v(TAG,"writing in savedInstance");
+//            outState.putSerializable("feed", fbFeed);
+//        }
+//    }
+    //
+    //    @Override
+    //    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+    //        super.onViewStateRestored(savedInstanceState);
+    //    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -56,23 +110,51 @@ public class FacebookFeed extends Fragment {
         init(view);
 
         mContext = getContext();
-        if(Utils.isInternetConnected(mContext)){
+        if (Utils.isInternetConnected(mContext) && savedInstanceState == null) {
             getFeed();
-        }else{
-            Toast.makeText(mContext,"internet not connected",Toast.LENGTH_SHORT).show();
+        } else {
+            if (savedInstanceState != null) {
+                FbFeed fbFeed = (FbFeed) savedInstanceState.getSerializable("feed");
+                if (fbFeed != null) {
+                    CustomAdapter adapter = new CustomAdapter(fbFeed.fbNewsPhotos, fbFeed.fbNewsLines, fbFeed.fbNewsDates, mContext);
+                    recyclerView.setAdapter(adapter);
+                } else {
+                    Toast.makeText(mContext, "internet not connected", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(mContext, "internet not connected", Toast.LENGTH_SHORT).show();
+            }
         }
         return view;
     }
 
     private void getFeed() {
         // Tag used to cancel the request
-        String tag_json_obj = "json_obj_req";
 
         String url = "https://graph.facebook.com/v2.8/dtusiam/posts?access_token=605382859616232|zj6UV0o9j6HhSYY9E2tXHC40iP4&fields=message%2Cobject_id%2Ccreated_time%2Clink%2Cfull_picture&__mref=message_bubble";
 
+
+        FbFeed localFBFeed = getFBfeed(url);
+
+    }
+
+    private FbFeed getFBfeed(String url) {
+        if (url.isEmpty()|| isLoading) {
+            return null;
+        }
+        isLoading=true;
+        boolean isFirstTime;
+        isFirstTime = (fbFeed == null);
         final ProgressDialog pDialog = new ProgressDialog(getActivity());
-        pDialog.setMessage("Loading...");
-        pDialog.show();
+
+        if (isFirstTime) {
+            pDialog.setMessage("Loading...");
+            pDialog.show();
+        }
+        String tag_json_obj = "json_obj_req";
+        final ArrayList<String> mNewsLines = new ArrayList<>();
+        final ArrayList<String> mNewsPhotos = new ArrayList<>();
+        final ArrayList<String> mNewsDates = new ArrayList<>();
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
                 url, null,
@@ -80,45 +162,81 @@ public class FacebookFeed extends Fragment {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG, response.toString());
                         try {
                             JSONArray array = response.getJSONArray("data");
+                            JSONObject paging = response.getJSONObject("paging");
+                            nextPage = paging.getString("next");
                             for (int i = 0; i < array.length(); i++) {
                                 JSONObject object = array.getJSONObject(i);
                                 if (object.has("message")) {
-                                    newsLines.add(object.getString("message"));
-                                    newsDates.add(object.getString("created_time"));
+                                    mNewsLines.add(object.getString("message"));
+                                    mNewsDates.add(object.getString("created_time"));
                                     if (object.has("full_picture"))
-                                        newsPhotos.add(object.getString("full_picture"));
+                                        mNewsPhotos.add(object.getString("full_picture"));
                                     else
-                                        newsPhotos.add("");
+                                        mNewsPhotos.add("");
                                 }
                             }
-                            CustomAdapter adapter = new CustomAdapter(newsPhotos, newsLines, newsDates, mContext);
-                            recyclerView.setAdapter(adapter);
+                            if (fbFeed == null) {
+                                fbFeed = new FbFeed(mNewsPhotos, mNewsLines, mNewsDates);
+                                newsDates = mNewsDates;
+                                newsLines = mNewsLines;
+                                newsPhotos = mNewsPhotos;
+                                pDialog.hide();
+                                adapter = new CustomAdapter(newsPhotos, newsLines, newsDates, mContext);
+                                recyclerView.setAdapter(adapter);
+
+                            } else {
+                                if(newsDates.contains(mNewsDates)){
+                                    System.out.println("found");
+                                }
+//                                fbFeed.add(mNewsPhotos, mNewsLines, mNewsDates);
+                                newsDates.addAll(mNewsDates);
+                                newsLines.addAll(mNewsLines);
+                                newsPhotos.addAll(mNewsPhotos);
+
+                            }
+                            if (adapter != null) {
+                                adapter.notifyDataSetChanged();
+                            }
+                            isLoading = false;
                         } catch (JSONException e) {
 
+                            isLoading = false;
                         }
-                        pDialog.hide();
+
                     }
                 }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-//                VolleyLog./d(TAG, "Error: " + error.getMessage());
+                //                VolleyLog./d(TAG, "Error: " + error.getMessage());
                 // hide the progress dialog
                 pDialog.hide();
+                isLoading = false;
             }
         });
 
-// Adding request to request queue
+        // Adding request to request queue
         AppController.getInstance(getContext()).addToRequestQueue(jsonObjReq, tag_json_obj);
+
+        return fbFeed;
     }
 
     private void init(View view) {
         recyclerView = (RecyclerView) view.findViewById(R.id.fb_feed_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        RecyclerView.LayoutManager layoutManager;
+        layoutManager = new LinearLayoutManager(mContext);
 
+        recyclerView.setLayoutManager(layoutManager);
+        endlessRecyclerViewScrollListener = new EndlessRecyclerViewScrollListener((LinearLayoutManager) layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                getFBfeed(nextPage);
+            }
+        };
+
+        recyclerView.addOnScrollListener(endlessRecyclerViewScrollListener);
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
@@ -147,8 +265,8 @@ public class FacebookFeed extends Fragment {
                 holder.newsPhoto.setVisibility(View.VISIBLE);
                 Picasso.with(mContext)
                         .load(photos.get(position))
-                        .placeholder(R.drawable.avatar)
-                        .error(R.drawable.avatar)
+                        .placeholder(R.drawable.siam)
+                        .error(R.drawable.siam)
                         .into(holder.newsPhoto);
             } else {
                 holder.newsPhoto.setVisibility(View.GONE);

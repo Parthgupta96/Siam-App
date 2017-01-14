@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     int lastSelectedID = R.id.nav_news_feed;
-
+    Fragment[] selectedFragment;
     UserObject mCurrentUser;
     NavigationView mNavigationView;
 
@@ -42,6 +42,14 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+//        selectedFragment = new Fragment[7];
+        selectedFragment = new Fragment[]{new FacebookFeed(),
+                new ContestFragment(),
+                null,
+                null,
+                null,
+                null,
+                new EventsFragment()};
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -50,12 +58,12 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         Intent intent = getIntent();
-        mCurrentUser = (UserObject)intent.getSerializableExtra("currentUser");
+        mCurrentUser = (UserObject) intent.getSerializableExtra("currentUser");
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
-        mNavigationView.setCheckedItem(R.id.nav_news_feed);
-        Fragment fragment = new FacebookFeed();
+        mNavigationView.setCheckedItem(R.id.nav_events);
+        Fragment fragment = new EventsFragment();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_main, fragment).commit();
         setUpNavigationDrawerHeader();
@@ -64,12 +72,16 @@ public class MainActivity extends AppCompatActivity
     private void setUpNavigationDrawerHeader() {
         View headerview = mNavigationView.getHeaderView(0);
         LinearLayout navHeader = (LinearLayout) headerview.findViewById(R.id.nav_header);
-        ImageView profileImage = (ImageView)headerview.findViewById(R.id.profile_image_nav_header);
-        TextView name = (TextView)headerview.findViewById(R.id.name_nav_header);
-        if(mCurrentUser!=null){
+        ImageView profileImage = (ImageView) headerview.findViewById(R.id.profile_image_nav_header);
+        TextView name = (TextView) headerview.findViewById(R.id.name_nav_header);
+        if (mCurrentUser != null) {
 
-            Picasso.with(this).load(mCurrentUser.getPhotoUrl()).noFade().placeholder(R.drawable.avatar)
-                    .error(R.drawable.avatar).into(profileImage);
+            Picasso.with(this)
+                    .load(mCurrentUser.getPhotoUrl())
+                    .noFade()
+                    .placeholder(R.drawable.avatar)
+                    .error(R.drawable.avatar)
+                    .into(profileImage);
             name.setText(mCurrentUser.getName());
             navHeader.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -128,7 +140,7 @@ public class MainActivity extends AppCompatActivity
             public void onConnected(@Nullable Bundle bundle) {
 
                 FirebaseAuth.getInstance().signOut();
-                if(mGoogleApiClient.isConnected()) {
+                if (mGoogleApiClient.isConnected()) {
                     Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
                         @Override
                         public void onResult(@NonNull Status status) {
@@ -152,16 +164,13 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Fragment fragment= new FacebookFeed();;
-        if(lastSelectedID!=id) {
+        int selected = 6;
+        if (lastSelectedID != id) {
             if (id == R.id.nav_news_feed) {
-                fragment = new FacebookFeed();
-//                getSupportFragmentManager().beginTransaction()
-//                        .replace(R.id.content_main, fragment).commit();
+                selected = 0;
 
             } else if (id == R.id.nav_contest) {
-                fragment = new ContestFragment();
-//                getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
+                selected = 1;
 
             } else if (id == R.id.nav_sponsors) {
 
@@ -172,10 +181,9 @@ public class MainActivity extends AppCompatActivity
             } else if (id == R.id.nav_rate_us) {
 
             } else if (id == R.id.nav_events) {
-                 fragment = new EventsFragment();
-//                getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
+                selected = 6;
             }
-            getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_main, selectedFragment[selected]).commit();
 
             lastSelectedID = id;
         }

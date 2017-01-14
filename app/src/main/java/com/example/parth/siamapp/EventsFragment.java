@@ -1,6 +1,7 @@
 package com.example.parth.siamapp;
 
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,10 +14,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import org.zakariya.stickyheaders.SectioningAdapter;
 import org.zakariya.stickyheaders.StickyHeaderLayoutManager;
+
+import java.util.ArrayList;
 
 
 /**
@@ -25,6 +33,9 @@ import org.zakariya.stickyheaders.StickyHeaderLayoutManager;
 public class EventsFragment extends Fragment {
     RecyclerView recyclerView;
     Context mContext;
+
+    private DatabaseReference mDatabase;
+
     public EventsFragment() {
         // Required empty public constructor
     }
@@ -41,75 +52,113 @@ public class EventsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_events, container, false);
         init(view);
-        
+
         return view;
     }
 
+    public interface OnGetDataListener {
+        public void onStart();
+
+        public void onSuccess(ArrayList<EventsModel> pastEvents,ArrayList<EventsModel> upcomingEvents);
+    }
+
     private void init(View view) {
+
         recyclerView = (RecyclerView) view.findViewById(R.id.events_recycler_view);
-        String image = "http\\";
-        EventsModel demos[] = {new EventsModel("name1",
-                "date1",image
-                ),
-                new EventsModel("name2",
-                        "date2",image
-                ),
-                new EventsModel("name3",
-                        "date3",image
-                )
-        };
-        EventsAdapter eventsAdapter = new EventsAdapter(getContext(), demos, demos,new ItemClickListener() {
+        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+        getEvents(new OnGetDataListener() {
             @Override
-            public void onItemClick(EventsModel eventsModel) {
-                Toast.makeText(getActivity(),"click",Toast.LENGTH_SHORT).show();
+            public void onStart() {
+                progressDialog.setMessage("Fetching Data...");
+                progressDialog.show();
+            }
+
+            @Override
+            public void onSuccess(ArrayList<EventsModel> pastEvents,ArrayList<EventsModel> upcomingEvents) {
+                progressDialog.dismiss();
+                StickyHeaderLayoutManager layoutManager = new StickyHeaderLayoutManager();
+
+                // set a header position callback to set elevation on sticky headers, because why not
+                layoutManager.setHeaderPositionChangedCallback(new StickyHeaderLayoutManager.HeaderPositionChangedCallback() {
+                    @Override
+                    public void onHeaderPositionChanged(int sectionIndex, View header, StickyHeaderLayoutManager.HeaderPosition oldPosition, StickyHeaderLayoutManager.HeaderPosition newPosition) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            boolean elevated = newPosition == StickyHeaderLayoutManager.HeaderPosition.STICKY;
+                            header.setElevation(elevated ? 8 : 0);
+                        }
+                    }
+                });
+
+                recyclerView.setLayoutManager(layoutManager);
+
+                EventsAdapter eventsAdapter = new EventsAdapter(getContext(), upcomingEvents, pastEvents, new ItemClickListener() {
+                    @Override
+                    public void onItemClick(EventsModel eventsModel) {
+                        Toast.makeText(getActivity(), "click", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                recyclerView.setAdapter(eventsAdapter);
+
             }
         });
-        recyclerView.setAdapter(eventsAdapter);
 
-        StickyHeaderLayoutManager layoutManager = new StickyHeaderLayoutManager();
 
-        // set a header position callback to set elevation on sticky headers, because why not
-        layoutManager.setHeaderPositionChangedCallback(new StickyHeaderLayoutManager.HeaderPositionChangedCallback() {
+    }
+
+    void getEvents(final OnGetDataListener onGetDataListener) {
+        onGetDataListener.onStart();
+        final ArrayList<EventsModel> upcomingEvents = new ArrayList<>();
+        final ArrayList<EventsModel> pastEvents = new ArrayList<>();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Event Details");
+        mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onHeaderPositionChanged(int sectionIndex, View header, StickyHeaderLayoutManager.HeaderPosition oldPosition, StickyHeaderLayoutManager.HeaderPosition newPosition) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    boolean elevated = newPosition == StickyHeaderLayoutManager.HeaderPosition.STICKY;
-                    header.setElevation(elevated ? 8 : 0);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int childNumber = 0;
+                for (DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
+                    System.out.println();
+                    for (DataSnapshot events : messageSnapshot.getChildren()) {
+//                        EventsModel eventsModel = events.getValue(EventsModel.class);
+                        if(childNumber==1){
+                            upcomingEvents.add(events.getValue(EventsModel.class));
+
+                        }else{
+                            pastEvents.add(events.getValue(EventsModel.class));
+                        }
+                        System.out.println();
+                    }
+//                    EventsModel eventsModel = dataSnapshot.getChildren();
+                childNumber=1;
                 }
+                if(upcomingEvents.size()==0){
+                    upcomingEvents.add(new EventsModel("name","date","http\\:"));
+                }
+                onGetDataListener.onSuccess(pastEvents,upcomingEvents);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
-
-        recyclerView.setLayoutManager(layoutManager);
-
     }
 
     private interface ItemClickListener {
         void onItemClick(EventsModel eventsModel);
     }
 
-    public class EventsModel {
-        String eventName;
-        String eventDate;
-        String imageUrl;
 
-        public EventsModel(String name, String date, String image) {
-            eventName = name;
-            eventDate = date;
-            this.imageUrl = image;
-        }
-    }
 
-    private  class EventsAdapter extends SectioningAdapter {
+    private class EventsAdapter extends SectioningAdapter {
 
         Context context;
-        EventsModel[] eventsModels;
-        EventsModel[] eventsModels1;
+        ArrayList<EventsModel> upcomingEvents;
+        ArrayList<EventsModel> pastEvents;
         ItemClickListener itemClickListener;
 
-        public EventsAdapter(Context context, EventsModel[] events,EventsModel[] events2, ItemClickListener itemClickListener) {
+        public EventsAdapter(Context context, ArrayList<EventsModel> upcomingEvents, ArrayList<EventsModel> pastEvents, ItemClickListener itemClickListener) {
             this.context = context;
-            this.eventsModels = events;
-            this.eventsModels1 = events2;
+            this.upcomingEvents = upcomingEvents;
+            this.pastEvents = pastEvents;
             this.itemClickListener = itemClickListener;
         }
 
@@ -143,7 +192,11 @@ public class EventsFragment extends Fragment {
 
         @Override
         public int getNumberOfItemsInSection(int sectionIndex) {
-            return eventsModels.length;
+            if(sectionIndex==0){
+                return upcomingEvents.size();
+            }else{
+                return pastEvents.size();
+            }
         }
 
         @Override
@@ -169,9 +222,9 @@ public class EventsFragment extends Fragment {
         public void onBindHeaderViewHolder(SectioningAdapter.HeaderViewHolder viewHolder, int sectionIndex, int headerType) {
             HeaderViewHolder hvh = (HeaderViewHolder) viewHolder;
             if (sectionIndex == 0) {
-                hvh.titleTextView.setText("1");
+                hvh.titleTextView.setText("upcomingEvents");
             } else {
-                hvh.titleTextView.setText("2");
+                hvh.titleTextView.setText("pastEvents");
             }
         }
 
@@ -180,17 +233,17 @@ public class EventsFragment extends Fragment {
             ItemViewHolder ivh = (ItemViewHolder) viewHolder;
             final EventsModel events;
 
-            if(sectionIndex==0){
-                events = eventsModels[itemIndex];
-            }else{
-                events = eventsModels1[itemIndex];
+            if (sectionIndex == 0) {
+                events = upcomingEvents.get(itemIndex);
+            } else {
+                events = pastEvents.get(itemIndex);
             }
             ivh.eventName.setText(events.eventName);
-            ivh.eventDate.setText(events.eventDate);
+            ivh.eventDate.setText(events.date);
 
             Picasso.with(mContext).load(events.imageUrl)
-                    .error(R.drawable.avatar)
-                    .placeholder(R.drawable.avatar)
+                    .error(R.drawable.siam)
+                    .placeholder(R.drawable.siam)
                     .into(ivh.eventImage);
 
 
@@ -201,7 +254,5 @@ public class EventsFragment extends Fragment {
                 }
             });
         }
-
-
     }
 }
