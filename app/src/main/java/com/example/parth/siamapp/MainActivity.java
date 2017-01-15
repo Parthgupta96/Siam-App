@@ -31,18 +31,19 @@ import static com.example.parth.siamapp.LoginActivity.mGoogleApiClient;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    int lastSelectedID = R.id.nav_news_feed;
+    int lastSelectedID = -1;
     Fragment[] selectedFragment;
     UserObject mCurrentUser;
     NavigationView mNavigationView;
-
+    DrawerLayout drawer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        selectedFragment = new Fragment[7];
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         selectedFragment = new Fragment[]{new FacebookFeed(),
                 new ContestFragment(),
                 null,
@@ -51,7 +52,6 @@ public class MainActivity extends AppCompatActivity
                 null,
                 new EventsFragment()};
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -62,8 +62,8 @@ public class MainActivity extends AppCompatActivity
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
-        mNavigationView.setCheckedItem(R.id.nav_events);
-        Fragment fragment = new EventsFragment();
+        mNavigationView.setCheckedItem(R.id.nav_news_feed);
+        Fragment fragment = new FacebookFeed();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_main, fragment).commit();
         setUpNavigationDrawerHeader();
@@ -87,7 +87,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(View view) {
                     ProfileFragment fragmentS1 = ProfileFragment.newInstance(mCurrentUser);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.content_main, fragmentS1).commit();
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.content_main, fragmentS1)
+                            .addToBackStack("Profile_view")
+                            .commit();
                     DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                     drawer.closeDrawer(GravityCompat.START);
 
@@ -98,7 +102,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -164,7 +167,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        int selected = 6;
+        int selected = 0;
         if (lastSelectedID != id) {
             if (id == R.id.nav_news_feed) {
                 selected = 0;

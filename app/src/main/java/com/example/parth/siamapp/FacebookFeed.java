@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.example.parth.siamapp.listeners.EndlessRecyclerViewScrollListener;
 import com.example.parth.siamapp.utils.Utils;
 import com.squareup.picasso.Picasso;
@@ -40,22 +42,25 @@ public class FacebookFeed extends Fragment {
     public FacebookFeed() {
         // Required empty public constructor
     }
+    public static final int FIRST_TIME = 0;
+    public static final int ON_SCROLL = 1;
     public static boolean isLoading = false;
     EndlessRecyclerViewScrollListener endlessRecyclerViewScrollListener;
     ArrayList<String> newsLines;
     ArrayList<String> newsPhotos;
     ArrayList<String> newsDates;
-    RecyclerView recyclerView;
+    ShimmerRecyclerView recyclerView;
     FbFeed fbFeed;
+    String firstUrl;
     String TAG = getClass().getSimpleName();
     Context mContext;
     String nextPage;
     CustomAdapter adapter;
-
+    ImageView noNetworkImage;
     private class FbFeed implements Serializable {
-         ArrayList<String> fbNewsLines;
-         ArrayList<String> fbNewsPhotos;
-         ArrayList<String> fbNewsDates;
+        ArrayList<String> fbNewsLines;
+        ArrayList<String> fbNewsPhotos;
+        ArrayList<String> fbNewsDates;
 
         public FbFeed() {
         }
@@ -83,19 +88,13 @@ public class FacebookFeed extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (fbFeed != null) {
+            Log.v(TAG, "writing in savedInstance");
+            outState.putSerializable("feed", fbFeed);
+        }
     }
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        if (fbFeed != null) {
-//            Log.v(TAG,"writing in savedInstance");
-//            outState.putSerializable("feed", fbFeed);
-//        }
-//    }
     //
     //    @Override
     //    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
@@ -108,7 +107,8 @@ public class FacebookFeed extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_facebook_feed, container, false);
         init(view);
-
+        recyclerView.setVisibility(View.VISIBLE);
+        noNetworkImage.setVisibility(View.GONE);
         mContext = getContext();
         if (Utils.isInternetConnected(mContext) && savedInstanceState == null) {
             getFeed();
@@ -120,9 +120,13 @@ public class FacebookFeed extends Fragment {
                     recyclerView.setAdapter(adapter);
                 } else {
                     Toast.makeText(mContext, "internet not connected", Toast.LENGTH_SHORT).show();
+                    recyclerView.setVisibility(View.GONE);
+                    noNetworkImage.setVisibility(View.VISIBLE);
                 }
             } else {
                 Toast.makeText(mContext, "internet not connected", Toast.LENGTH_SHORT).show();
+                recyclerView.setVisibility(View.GONE);
+                noNetworkImage.setVisibility(View.VISIBLE);
             }
         }
         return view;
@@ -131,18 +135,22 @@ public class FacebookFeed extends Fragment {
     private void getFeed() {
         // Tag used to cancel the request
 
-        String url = "https://graph.facebook.com/v2.8/dtusiam/posts?access_token=605382859616232|zj6UV0o9j6HhSYY9E2tXHC40iP4&fields=message%2Cobject_id%2Ccreated_time%2Clink%2Cfull_picture&__mref=message_bubble";
+        firstUrl = "https://graph.facebook.com/v2.8/dtusiam/posts?access_token=605382859616232|zj6UV0o9j6HhSYY9E2tXHC40iP4&fields=message%2Cobject_id%2Ccreated_time%2Clink%2Cfull_picture&__mref=message_bubble";
 
 
-        FbFeed localFBFeed = getFBfeed(url);
+        FbFeed localFBFeed = getFBfeed(firstUrl,FIRST_TIME);
 
     }
 
-    private FbFeed getFBfeed(String url) {
-        if (url.isEmpty()|| isLoading) {
+    private FbFeed getFBfeed(String url,int calledPlace) {
+        if (url.isEmpty() || isLoading) {
             return null;
         }
-        isLoading=true;
+        if (calledPlace==FIRST_TIME && adapter!=null) {
+            recyclerView.setAdapter(adapter);
+            return null;
+        }
+            isLoading = true;
         boolean isFirstTime;
         isFirstTime = (fbFeed == null);
         final ProgressDialog pDialog = new ProgressDialog(getActivity());
@@ -150,6 +158,7 @@ public class FacebookFeed extends Fragment {
         if (isFirstTime) {
             pDialog.setMessage("Loading...");
             pDialog.show();
+            recyclerView.showShimmerAdapter();
         }
         String tag_json_obj = "json_obj_req";
         final ArrayList<String> mNewsLines = new ArrayList<>();
@@ -183,18 +192,17 @@ public class FacebookFeed extends Fragment {
                                 newsLines = mNewsLines;
                                 newsPhotos = mNewsPhotos;
                                 pDialog.hide();
+                                recyclerView.hideShimmerAdapter();
                                 adapter = new CustomAdapter(newsPhotos, newsLines, newsDates, mContext);
                                 recyclerView.setAdapter(adapter);
 
                             } else {
-                                if(newsDates.contains(mNewsDates)){
+                                if (newsDates.contains(mNewsDates.get(0))) {
                                     System.out.println("found");
                                 }
-//                                fbFeed.add(mNewsPhotos, mNewsLines, mNewsDates);
-                                newsDates.addAll(mNewsDates);
-                                newsLines.addAll(mNewsLines);
-                                newsPhotos.addAll(mNewsPhotos);
-
+                                    newsDates.addAll(mNewsDates);
+                                    newsLines.addAll(mNewsLines);
+                                    newsPhotos.addAll(mNewsPhotos);
                             }
                             if (adapter != null) {
                                 adapter.notifyDataSetChanged();
@@ -212,7 +220,8 @@ public class FacebookFeed extends Fragment {
             public void onErrorResponse(VolleyError error) {
                 //                VolleyLog./d(TAG, "Error: " + error.getMessage());
                 // hide the progress dialog
-                pDialog.hide();
+//                pDialog.hide();
+                recyclerView.hideShimmerAdapter();
                 isLoading = false;
             }
         });
@@ -224,15 +233,18 @@ public class FacebookFeed extends Fragment {
     }
 
     private void init(View view) {
-        recyclerView = (RecyclerView) view.findViewById(R.id.fb_feed_recycler_view);
+        recyclerView = (ShimmerRecyclerView) view.findViewById(R.id.fb_feed_recycler_view);
         RecyclerView.LayoutManager layoutManager;
         layoutManager = new LinearLayoutManager(mContext);
-
+        noNetworkImage = (ImageView)view.findViewById(R.id.no_internet_image);
+        noNetworkImage.setVisibility(View.GONE);
         recyclerView.setLayoutManager(layoutManager);
         endlessRecyclerViewScrollListener = new EndlessRecyclerViewScrollListener((LinearLayoutManager) layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                getFBfeed(nextPage);
+                if(nextPage!=null) {
+                    getFBfeed(nextPage, ON_SCROLL);
+                }
             }
         };
 

@@ -91,7 +91,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void initializeSignIn() {
-        UserObject mCurrentUser = new UserObject();
+        mCurrentUser = new UserObject();
         mCurrentUser.setEmail(mUser.getEmail());
         mCurrentUser.setName(mUser.getDisplayName());
         mCurrentUser.setPhotoUrl(mUser.getPhotoUrl().toString());
@@ -208,6 +208,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        if(mCurrentUser==null){
+            System.out.println("  \n\n");
+        }
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override

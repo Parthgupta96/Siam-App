@@ -86,7 +86,7 @@ public class ContestFragment extends Fragment {
                 mTimeStamp = (Long)dataSnapshot.child("Time").getValue();
                 mDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                 mCurrentDate = new Date(mTimeStamp);
-                mCurrentDate = mDateFormat.format(new Date(mTimeStamp));
+//                mCurrentDate = mDateFormat.format(new Date(mTimeStamp));
             }
 
             @Override
