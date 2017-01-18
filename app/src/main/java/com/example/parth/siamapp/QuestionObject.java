@@ -7,17 +7,37 @@ import java.lang.reflect.Array;
  */
 
 public class QuestionObject {
-    private String questionNumber;
+    private String date;
     private String question;
     private String answerType;
     private String answeer;
+    private String imageUrl;
+    private String winnerEmail;
+    private AttemptedByUserObject attemptedByUserObject;
+    private Array options;
 
-    public String getQuestionNumber() {
-        return questionNumber;
+    public String getDate() {
+        return date;
     }
 
-    public void setQuestionNumber(String questionNumber) {
-        this.questionNumber = questionNumber;
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getWinnerEmail() {
+        return winnerEmail;
+    }
+
+    public void setWinnerEmail(String winnerEmail) {
+        this.winnerEmail = winnerEmail;
+    }
+
+    public AttemptedByUserObject getAttemptedByUserObject() {
+        return attemptedByUserObject;
+    }
+
+    public void setAttemptedByUserObject(AttemptedByUserObject attemptedByUserObject) {
+        this.attemptedByUserObject = attemptedByUserObject;
     }
 
     public String getQuestion() {
@@ -44,23 +64,20 @@ public class QuestionObject {
         this.answeer = answeer;
     }
 
-    public String getImage() {
-        return image;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
-    public Array getAnswerOptions() {
-        return answerOptions;
+    public Array getOptions() {
+        return options;
     }
 
-    public void setAnswerOptions(Array answerOptions) {
-        this.answerOptions = answerOptions;
+    public void setOptions(Array options) {
+        this.options = options;
     }
-
-    private String image;
-    private Array answerOptions;
 
 }
