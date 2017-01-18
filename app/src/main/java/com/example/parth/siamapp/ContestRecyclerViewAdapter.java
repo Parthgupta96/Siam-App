@@ -8,10 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -52,7 +55,31 @@ public class ContestRecyclerViewAdapter extends RecyclerView.Adapter<ContestRecy
                 notifyDataSetChanged();
             }
         });
-        holder.question.setText("abc");
+        holder.date.setText(mQuestions.get(position).getDate());
+        holder.question.setText(mQuestions.get(position).getQuestion());
+        if(mQuestions.get(position).getImageUrl() != null){                 //image provided
+            Picasso.with(mContext).load(mQuestions.get(position).getImageUrl())
+                    .placeholder(R.drawable.avatar).into(holder.questionImage);
+        }
+        if((mQuestions.get(position).getAnswerType()).equals("0")){ // mcq question
+            holder.answerOptionsRadioGroup.setVisibility(View.VISIBLE);
+            holder.subjectiveAnswer.setVisibility(View.INVISIBLE);
+            List<String> options = mQuestions.get(position).getOptions();
+            holder.option1.setText(options.get(0));
+            holder.option2.setText(options.get(1));
+            holder.option3.setText(options.get(2));
+            holder.option4.setText(options.get(3));
+        }else{                                                              // subjective question
+            holder.subjectiveAnswer.setVisibility(View.VISIBLE);
+            holder.answerOptionsRadioGroup.setVisibility(View.INVISIBLE);
+        }
+        holder.submitBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO implement submit button. change DB for USERS as well as question.
+            }
+        });
+
 
     }
 
@@ -65,6 +92,7 @@ public class ContestRecyclerViewAdapter extends RecyclerView.Adapter<ContestRecy
         TextView questionNum;
         TextView date;
         TextView question;
+        ImageView questionImage;
         RadioGroup answerOptionsRadioGroup;
         RadioButton option1, option2, option3, option4;
         EditText subjectiveAnswer;
@@ -75,6 +103,7 @@ public class ContestRecyclerViewAdapter extends RecyclerView.Adapter<ContestRecy
             questionNum = (TextView)itemView.findViewById(R.id.question_no);
             date = (TextView)itemView.findViewById(R.id.date);
             question = (TextView)itemView.findViewById(R.id.question);
+            questionImage = (ImageView)itemView.findViewById(R.id.question_image);
             answerOptionsRadioGroup = (RadioGroup)itemView.findViewById(R.id.options_radio_group);
             option1 = (RadioButton)itemView.findViewById(R.id.option1);
             option2 = (RadioButton)itemView.findViewById(R.id.option2);

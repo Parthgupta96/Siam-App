@@ -1,6 +1,6 @@
 package com.example.parth.siamapp;
 
-import java.lang.reflect.Array;
+import java.util.List;
 
 /**
  * Created by Priyanshu on 08-01-2017.
@@ -14,7 +14,7 @@ public class QuestionObject {
     private String imageUrl;
     private String winnerEmail;
     private AttemptedByUserObject attemptedByUserObject;
-    private Array options;
+    private List<String> options;
 
     public String getDate() {
         return date;
@@ -72,11 +72,11 @@ public class QuestionObject {
         this.imageUrl = imageUrl;
     }
 
-    public Array getOptions() {
+    public List<String> getOptions() {
         return options;
     }
 
-    public void setOptions(Array options) {
+    public void setOptions(List<String> options) {
         this.options = options;
     }
 
