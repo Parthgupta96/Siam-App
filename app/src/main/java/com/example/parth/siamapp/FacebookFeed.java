@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,15 +85,15 @@ public class FacebookFeed extends Fragment {
         newsDates = new ArrayList<>();
 
     }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (fbFeed != null) {
-            Log.v(TAG, "writing in savedInstance");
-            outState.putSerializable("feed", fbFeed);
-        }
-    }
+//
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        if (fbFeed != null) {
+//            Log.v(TAG, "writing in savedInstance");
+//            outState.putSerializable("feed", fbFeed);
+//        }
+//    }
     //
     //    @Override
     //    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {

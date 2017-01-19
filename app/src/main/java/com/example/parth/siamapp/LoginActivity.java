@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestIdToken(getResources().getString(R.string.google_auth_key_1))
+                .requestIdToken(getResources().getString(R.string.google_auth_key_2))
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -109,7 +109,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         mRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (mCurrentUser != null) {
+                if (mCurrentUser.getEmail() != null) {
                     String email = mCurrentUser.getEmail().replace('.', ',');
                     if (!dataSnapshot.hasChild(email)) {
 //                    mProgreeDialog.dismiss();
