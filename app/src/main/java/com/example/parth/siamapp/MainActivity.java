@@ -43,6 +43,11 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        Intent intent = getIntent();
+        mCurrentUser = (UserObject) intent.getSerializableExtra("currentUser");
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("currentUser",mCurrentUser);
 
         selectedFragment = new Fragment[]{new FacebookFeed(),
                 new ContestFragment(),
@@ -52,13 +57,17 @@ public class MainActivity extends AppCompatActivity
                 null,
                 new EventsFragment()};
 
+        for(Fragment fragment:selectedFragment){
+            if(fragment!=null){
+                fragment.setArguments(bundle);
+            }
+        }
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        Intent intent = getIntent();
-        mCurrentUser = (UserObject) intent.getSerializableExtra("currentUser");
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);

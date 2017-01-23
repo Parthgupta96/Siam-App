@@ -1,5 +1,6 @@
 package com.example.parth.siamapp;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.transition.TransitionManager;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.example.parth.siamapp.AppController.mContext;
 
 public class ContestFragment extends Fragment {
 
@@ -42,7 +44,7 @@ public class ContestFragment extends Fragment {
     private DatabaseReference mQuestionsDatabaseRef;
     private DatabaseReference mUsersDatabaseRef;
     private DatabaseReference mRootRef;
-    private UserObject mCurrentUser;
+    public UserObject mCurrentUser;
     private Long mTimeStamp;
     private Long mInitialTmeStamp;
     private SimpleDateFormat mDateFormat;
@@ -55,15 +57,14 @@ public class ContestFragment extends Fragment {
     private List<QuestionObject> mPastQuestions;
     private CardView mCurrentQuesCardView;
     private LinearLayout mAnswersExpandable;
-    private Context mContext;
+    private DatabaseReference mQuestionsAttemptedByRef;
+    private DatabaseReference mDatabaseUsersRef;
+    private boolean isMcq = false;
+    private boolean isQuesAttemptedByCurrentUser = false;
+    private ProgressDialog mProgress;
+
     public ContestFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mContext = context;
     }
 
     public static ContestFragment newInstance(UserObject currentUser) {
@@ -72,6 +73,12 @@ public class ContestFragment extends Fragment {
         bundle.putSerializable("currentUser", currentUser);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
     }
 
     @Override
@@ -87,7 +94,9 @@ public class ContestFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mRoot = inflater.inflate(R.layout.fragment_contest, container, false);
-
+        if (getArguments() != null && mCurrentUser == null) {
+            mCurrentUser = (UserObject) getArguments().getSerializable("currentUser");
+        }
         mContestRecyclerView = (RecyclerView) mRoot.findViewById(R.id.contest_questions_recycler_view);
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mRootRef = mFirebaseDatabase.getReference();
@@ -95,6 +104,14 @@ public class ContestFragment extends Fragment {
         mUsersDatabaseRef = mFirebaseDatabase.getReference().child("Users").child("priyanshu96.goyal@gmail.com".replace('.', ','));
         mCurrentQuesCardView = (CardView) mRoot.findViewById(R.id.current_ques_cardview);
         mAnswersExpandable = (LinearLayout) mRoot.findViewById(R.id.answer_options_expandable_current_ques);
+        mQuestionsAttemptedByRef = mFirebaseDatabase.getReference().child("Questions");
+        if (mCurrentUser != null) {
+            mDatabaseUsersRef = mFirebaseDatabase.getReference().child("Users").child(mCurrentUser.getEmail().replace(".", ","));
+        }
+        mProgress = new ProgressDialog(mContext);
+        mProgress.setMessage("Loading...");
+        mProgress.show();
+
 
         mCurrentQuesCardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,13 +135,9 @@ public class ContestFragment extends Fragment {
             }
         });
 
-
         mPastQuestions = new ArrayList<>();
 
-        mAdapter = new ContestRecyclerViewAdapter(mPastQuestions, mContext);
-        mContestRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mContestRecyclerView.setAdapter(mAdapter);
-//        mAdapter.notifyDataSetChanged();
+        mContestRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         return mRoot;
     }
@@ -140,7 +153,23 @@ public class ContestFragment extends Fragment {
 //                mCurrentDate = mDateFormat.format(new Date(mTimeStamp));
                 mNumOfDays = (int) (mDiffInMs / 1000 / 3600 / 24);
                 mCurrentQuesNum = (mNumOfDays / 2);
-                updateUI();
+                updateUI(new OnGetDataListener() {
+                    @Override
+                    public void onStart() {
+
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        if (mContestRecyclerView.getAdapter() == null) {
+                            mAdapter = new ContestRecyclerViewAdapter(mPastQuestions, getContext(), mCurrentUser);
+                            mContestRecyclerView.setAdapter(mAdapter);
+                            mAdapter.notifyDataSetChanged();
+                        } else {
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
             }
 
             @Override
@@ -152,22 +181,24 @@ public class ContestFragment extends Fragment {
 
     }
 
-    private void updateUI() {
-        mQuestionsDatabaseRef.limitToFirst(mCurrentQuesNum).addValueEventListener(new ValueEventListener() {
+    private void updateUI(final OnGetDataListener onGetDataListener) {
+        mQuestionsDatabaseRef.limitToFirst(mCurrentQuesNum + 1).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                mPastQuestions = new ArrayList<QuestionObject>();
                 for (DataSnapshot questionsSnapshot : dataSnapshot.getChildren()) {
                     String key = questionsSnapshot.getKey();
                     if (Integer.valueOf(key) == mCurrentQuesNum) {
-                        mCurrentQuestion = (QuestionObject) questionsSnapshot.getValue();
+                        mCurrentQuestion = questionsSnapshot.getValue(QuestionObject.class);
                         populateCurrentQues();
 
                     } else {
-                        QuestionObject questionObject = (QuestionObject) questionsSnapshot.getValue(QuestionObject.class);
+                        QuestionObject questionObject = questionsSnapshot.getValue(QuestionObject.class);
                         mPastQuestions.add(questionObject);
-                        mAdapter.notifyDataSetChanged();
                     }
+                    mProgress.dismiss();
                 }
+                onGetDataListener.onSuccess();
             }
 
             @Override
@@ -182,9 +213,9 @@ public class ContestFragment extends Fragment {
         TextView date;
         TextView question;
         ImageView questionImage;
-        RadioGroup answerOptionsRadioGroup;
-        RadioButton option1, option2, option3, option4;
-        EditText subjectiveAnswer;
+        final RadioGroup answerOptionsRadioGroup;
+        final RadioButton option1, option2, option3, option4;
+        final EditText subjectiveAnswer;
         Button submitBt;
         questionNum = (TextView) mRoot.findViewById(R.id.question_no);
         date = (TextView) mRoot.findViewById(R.id.date);
@@ -198,36 +229,91 @@ public class ContestFragment extends Fragment {
         subjectiveAnswer = (EditText) mRoot.findViewById(R.id.subjective_answer);
         submitBt = (Button) mRoot.findViewById(R.id.submit_bt);
 
-        date.setText(mCurrentQuestion.getDate());
-        question.setText(mCurrentQuestion.getQuestion());
-        if (!mCurrentQuestion.getImageUrl().equalsIgnoreCase("null")) {                 //image provided
-            Picasso.with(mContext)
-                    .load(mCurrentQuestion.getImageUrl())
-                    .placeholder(R.drawable.avatar)
-                    .into(questionImage);
-        }else{
+        if (mCurrentQuestion != null) {
 
-        }
-        if ((mCurrentQuestion.getAnswerType()).equals("0")) { // mcq question
-            answerOptionsRadioGroup.setVisibility(View.VISIBLE);
-            subjectiveAnswer.setVisibility(View.INVISIBLE);
-            List<String> options = mCurrentQuestion.getOptions();
-            option1.setText(options.get(0));
-            option2.setText(options.get(1));
-            option3.setText(options.get(2));
-            option4.setText(options.get(3));
-        } else {                                                              // subjective question
-            subjectiveAnswer.setVisibility(View.VISIBLE);
-            answerOptionsRadioGroup.setVisibility(View.INVISIBLE);
-        }
-        submitBt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO implement submit button. change DB for USERS as well as question.
+            date.setText(mCurrentQuestion.getDate());
+            question.setText(mCurrentQuestion.getQuestion());
+            if (mCurrentQuestion.getImageUrl() != null) {                 //image provided
+                Picasso.with(mContext).load(mCurrentQuestion.getImageUrl())
+                        .placeholder(R.drawable.avatar).into(questionImage);
             }
-        });
+            if ((mCurrentQuestion.getAnswerType()).equals("0")) { // mcq question
+                answerOptionsRadioGroup.setVisibility(View.VISIBLE);
+                subjectiveAnswer.setVisibility(View.INVISIBLE);
+                List<String> options = mCurrentQuestion.getOptions();
+                option1.setText(options.get(0));
+                option2.setText(options.get(1));
+                option3.setText(options.get(2));
+                option4.setText(options.get(3));
+            } else {                                                              // subjective question
+                subjectiveAnswer.setVisibility(View.VISIBLE);
+                answerOptionsRadioGroup.setVisibility(View.INVISIBLE);
+            }
 
+            for (int i = 0; i < mCurrentQuestion.getNumberOfAttempts(); i++) {
+                AttemptedByUserObject mTempObject = mCurrentQuestion.getAttemptedByUserObject().get(i);
+                if (mTempObject.getEmail().equals(mCurrentUser.getEmail())) {
+                    isQuesAttemptedByCurrentUser = true;
+                    break;
+                }
+            }
+        }
+        if (isQuesAttemptedByCurrentUser) {
+            submitBt.setClickable(false);
+        } else {
+            submitBt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mProgress.setMessage("Submitting...");
+                    mProgress.show();
 
+                    //TODO implement submit button. change DB for USERS as well as question.
+                    mQuestionsAttemptedByRef = mQuestionsAttemptedByRef.child(mCurrentQuesNum + "").child("attemptedBy").child(mCurrentQuestion.getNumberOfAttempts() + "");
+                    mDatabaseUsersRef = mDatabaseUsersRef.child("attemptedQuestions").child(mCurrentQuesNum + "");
+                    mQuestionsDatabaseRef.child("email").setValue(mCurrentUser.getEmail().replace(".", ","));
+                    String answer = "";
+                    if (isMcq == true) {
+                        int selsectedButtonId = answerOptionsRadioGroup.getCheckedRadioButtonId();
+                        switch (selsectedButtonId) {
+                            case R.id.option1:
+                                answer = option1.getText().toString();
+                                break;
+                            case R.id.option2:
+                                answer = option2.getText().toString();
+                                break;
+                            case R.id.option3:
+                                answer = option3.getText().toString();
+                                break;
+                            case R.id.option4:
+                                answer = option4.getText().toString();
+                                break;
+                        }
+                        mQuestionsAttemptedByRef.child("answer").setValue(answer);
+                        mDatabaseUsersRef.child("answer").setValue(answer);
+                    } else {
+                        mQuestionsAttemptedByRef.child("answer").setValue(subjectiveAnswer.getText().toString());
+                        mDatabaseUsersRef.child("answer").setValue(subjectiveAnswer.getText().toString());
+                    }
+                    mQuestionsAttemptedByRef.child("submittionTime").setValue(ServerValue.TIMESTAMP);
+                    mDatabaseUsersRef.child("submittionTime").setValue(ServerValue.TIMESTAMP);
+                    if (answer == mCurrentQuestion.getAnsweer()) {
+                        mQuestionsAttemptedByRef.child("status").setValue("correct");
+                        mDatabaseUsersRef.child("status").setValue("correct");
+                    } else {
+                        mQuestionsAttemptedByRef.child("status").setValue("wrong");
+                        mDatabaseUsersRef.child("status").setValue("wrong");
+                    }
+                    mProgress.dismiss();
+                }
+            });
+        }
+
+    }
+
+    public interface OnGetDataListener {
+        public void onStart();
+
+        public void onSuccess();
     }
 
 

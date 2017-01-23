@@ -13,7 +13,7 @@ public class QuestionObject {
     private String answeer;
     private String imageUrl;
     private String winnerEmail;
-    private AttemptedByUserObject attemptedByUserObject;
+    private List<AttemptedByUserObject> attemptedByUserObject;
     private List<String> options;
 
     public String getDate() {
@@ -32,11 +32,11 @@ public class QuestionObject {
         this.winnerEmail = winnerEmail;
     }
 
-    public AttemptedByUserObject getAttemptedByUserObject() {
+    public List<AttemptedByUserObject> getAttemptedByUserObject() {
         return attemptedByUserObject;
     }
 
-    public void setAttemptedByUserObject(AttemptedByUserObject attemptedByUserObject) {
+    public void setAttemptedByUserObject(List<AttemptedByUserObject> attemptedByUserObject) {
         this.attemptedByUserObject = attemptedByUserObject;
     }
 
@@ -80,4 +80,11 @@ public class QuestionObject {
         this.options = options;
     }
 
+    public int getNumberOfAttempts(){
+        if(attemptedByUserObject==null){
+            return 0;
+        }else{
+            return attemptedByUserObject.size();
+        }
+    }
 }
