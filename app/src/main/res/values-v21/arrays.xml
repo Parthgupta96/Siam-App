@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <array name="landing_bg">
+        <item>@color/light_green</item>
+        <item>@color/light_purple</item>
+        <item>@color/light_cyan</item>
+
+    </array>
+
+    <array name="icons">
+        <item>@drawable/calendar</item>
+        <item>@drawable/gift</item>
+        <item>@drawable/trophy</item>
+
+    </array>
+
+    <string-array name="titles" >
+
+        <item>@string/event</item>
+        <item>@string/contest_intro</item>
+        <item>@string/winner</item>
+
+    </string-array>
+
+    <string-array name="hints" >
+
+        <item>@string/event_hint</item>
+        <item>@string/contest_hint</item>
+        <item>@string/winner_hint</item>
+
+    </string-array>
+</resources>

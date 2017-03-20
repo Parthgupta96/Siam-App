@@ -1,11 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+android:background="@color/background_light"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.parth.siamapp.ProfileFragment">
+    tools:context="com.example.parth.siamapp.in.example.parth.siamapp.fragments.ProfileFragment">
 
 
     <LinearLayout
@@ -15,29 +16,14 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-        <!--<ImageView-->
-            <!--android:id="@+id/profile_image"-->
-            <!--android:layout_width="120dp"-->
-            <!--android:layout_height="120dp"-->
-            <!--android:layout_below="@+id/header_cover_image"-->
-            <!--android:layout_centerHorizontal="true"-->
-            <!--android:layout_gravity="center"-->
-            <!--android:layout_marginTop="5dp"-->
-            <!--android:background="@drawable/profile_circular_image_view"-->
-            <!--android:elevation="5dp"-->
-            <!--android:padding="20dp"-->
-            <!--android:scaleType="centerCrop"-->
-            <!--app:srcCompat="@drawable/com_facebook_profile_picture_blank_square" />-->
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/profile_image"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/com_facebook_profile_picture_blank_portrait"
             android:layout_gravity="center_horizontal"
             android:elevation="5dp"
-            android:padding="20dp"/>
+            android:padding="20dp"
+            android:src="@drawable/com_facebook_profile_picture_blank_portrait" />
 
         <TextView
             android:id="@+id/name"
@@ -46,8 +32,8 @@
             android:paddingTop="10dp"
             android:text="Name"
             android:textAlignment="center"
-            android:textSize="20sp"
-            android:textColor="@android:color/black"/>
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/email"
@@ -55,7 +41,7 @@
             android:layout_height="wrap_content"
             android:text="Email"
             android:textAlignment="center"
-            android:textSize="16sp"/>
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/mobile"
@@ -64,7 +50,8 @@
             android:layout_gravity="center_horizontal"
             android:text="Contact"
             android:textAlignment="center"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <android.support.v7.widget.CardView
@@ -81,12 +68,30 @@
             android:orientation="vertical"
             android:padding="8dp">
 
-            <TextView
-                android:id="@+id/credits"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Credits : 20"
-                android:textSize="24sp"/>
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/credits"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/credits"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:text="20"
+                    android:textSize="24sp" />
+
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -95,24 +100,27 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/redeem_bt"
+                    android:id="@+id/bt_redeem"
                     style="@style/Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Redeem" />
 
                 <Button
+                    android:visibility="gone"
                     android:id="@+id/view_history_bt"
                     style="@style/Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="View History" />
+
             </LinearLayout>
         </LinearLayout>
 
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
@@ -121,6 +129,7 @@
         card_view:cardUseCompatPadding="true">
 
         <LinearLayout
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -131,7 +140,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Questions Attempted"
-                android:textSize="24sp"/>
+                android:textSize="24sp" />
+
             <Button
                 android:id="@+id/view_more_bt"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"

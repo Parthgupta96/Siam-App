@@ -1,35 +1,35 @@
 {
   "project_info": {
-    "project_number": "668739284625",
-    "firebase_url": "https://siam-app-39da1.firebaseio.com",
-    "project_id": "siam-app-39da1",
-    "storage_bucket": "siam-app-39da1.appspot.com"
+    "project_number": "938483124503",
+    "firebase_url": "https://siam-2k17-app.firebaseio.com",
+    "project_id": "siam-2k17-app",
+    "storage_bucket": "siam-2k17-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:668739284625:android:392e699ffb4b6093",
+        "mobilesdk_app_id": "1:938483124503:android:bca2a234ad2e6bce",
         "android_client_info": {
-          "package_name": "com.example.parth.siamapp"
+          "package_name": "com.example.parth.siam_admin"
         }
       },
       "oauth_client": [
         {
-          "client_id": "668739284625-juhtl8rg2f5bb3vmp8r2gnst6dnsr5n7.apps.googleusercontent.com",
+          "client_id": "938483124503-suii3lbunv8955c9gat8b522avfubaen.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.parth.siamapp",
-            "certificate_hash": "5542C831B08A7A83758E0116D0C81EC9AA61D8D0"
+            "package_name": "com.example.parth.siam_admin",
+            "certificate_hash": "5542c831b08a7a83758e0116d0c81ec9aa61d8d0"
           }
         },
         {
-          "client_id": "668739284625-1p8odffpoemq2ajstsk0vuhb5jnki5mb.apps.googleusercontent.com",
+          "client_id": "938483124503-3sgm9tfm4vjlkprnroomuqjm9akfo5of.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAHzY0bul_ZGXz8cN2LI9Vr5U71s_H-nuo"
+          "current_key": "AIzaSyBE2eWIRARTv93NW7BGRcKn70SsQzLtSP0"
         }
       ],
       "services": {
@@ -40,7 +40,59 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "668739284625-1p8odffpoemq2ajstsk0vuhb5jnki5mb.apps.googleusercontent.com",
+              "client_id": "938483124503-3sgm9tfm4vjlkprnroomuqjm9akfo5of.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:938483124503:android:3b1b9ab6d71a46e8",
+        "android_client_info": {
+          "package_name": "in.siamdtu.parth.siamapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "938483124503-8qchpr4ucta0jdudojgspl3vapqp59q3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.siamdtu.parth.siamapp",
+            "certificate_hash": "5542c831b08a7a83758e0116d0c81ec9aa61d8d0"
+          }
+        },
+        {
+          "client_id": "938483124503-eqbin9eno855jkk4d2iplucp7hsamavr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.siamdtu.parth.siamapp",
+            "certificate_hash": "2abcf47b46386289f8f24c97ff70473bc4443813"
+          }
+        },
+        {
+          "client_id": "938483124503-3sgm9tfm4vjlkprnroomuqjm9akfo5of.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBE2eWIRARTv93NW7BGRcKn70SsQzLtSP0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "938483124503-3sgm9tfm4vjlkprnroomuqjm9akfo5of.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

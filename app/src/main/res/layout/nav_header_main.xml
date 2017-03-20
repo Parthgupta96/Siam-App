@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/nav_header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
     android:background="@drawable/side_nav_bar"
@@ -9,34 +10,46 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark"
-    android:id="@+id/nav_header">
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/profile_image_nav_header"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/com_facebook_profile_picture_blank_portrait"
         android:layout_gravity="center_horizontal"
         android:elevation="5dp"
-        android:padding="16dp"/>
+        android:padding="16dp"
+        android:src="@drawable/com_facebook_profile_picture_blank_portrait" />
 
     <TextView
+        android:id="@+id/name_nav_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:paddingTop="10dp"
         android:text="User name"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:id="@+id/name_nav_header"
-        android:layout_gravity="center_horizontal"/>
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-    <TextView
-        android:id="@+id/credits_nav_header"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Credit : 20"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Credits : " />
+
+        <TextView
+            android:id="@+id/credits_nav_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="0" />
+
+    </LinearLayout>
 </LinearLayout>

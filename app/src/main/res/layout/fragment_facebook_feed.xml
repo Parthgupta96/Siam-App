@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_light"
-    tools:context="com.example.parth.siamapp.FacebookFeed">
+    tools:context="com.example.parth.siamapp.in.example.parth.siamapp.fragments.FacebookFeed">
 
     <com.cooltechworks.views.shimmer.ShimmerRecyclerView
         android:id="@+id/fb_feed_recycler_view"
@@ -13,11 +13,12 @@
         android:layout_marginTop="8dp"
         android:scrollbars="vertical"
         app:layoutManager="LinearLayoutManager"
-        tools:listitem="@layout/feed_item">
+        tools:listitem="@layout/feed_item"
+        />
 
-    </com.cooltechworks.views.shimmer.ShimmerRecyclerView>
 
     <ImageView
+        android:contentDescription="@string/no_internet_connection"
         android:id="@+id/no_internet_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -3,11 +3,22 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="row_background">#f6e5e5</color>
-    <color name="row_selected_background">#f5d6d6</color>
+    <color name="row_background">#f3feff</color>
+    <color name="row_selected_background">#e8fbfd</color>
     <color name="background">#d6b2b2b2</color>
 
+    <color name="hyperlink_blue">#0645AD</color>
     <color name="headerBackground">#eeeeee</color>
     <color name="divider">#9e9e9e</color>
     <color name="background_light">#efebe9</color>
+    <color name="text_black">#212121</color>
+
+    <color name="red">#ff1744</color>
+
+    <color name="light_green">#3eb74e</color>
+    <color name="light_purple">#8c61b3</color>
+    <color name="light_orange">#ffb500</color>
+    <color name="light_cyan">#00BCD4</color>
+
+
 </resources>

@@ -24,7 +24,7 @@
         android:paddingTop="2dp"
         android:textAllCaps="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#aa00ff"
+        android:textColor="#304ffe"
         android:textSize="20sp"
         android:textStyle="bold"
         tools:text="Medium Text" />

@@ -1,0 +1,17 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.example.parth.siamapp.in.example.parth.siamapp.fragments.SponsorsFragment">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/sponsors_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        app:layoutManager="StaggeredGridLayoutManager"
+        tools:listitem="@layout/sponsors_item_image"
+        />
+
+</FrameLayout>
